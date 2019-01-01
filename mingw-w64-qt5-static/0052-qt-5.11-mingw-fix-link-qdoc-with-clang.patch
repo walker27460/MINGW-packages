@@ -1,6 +1,6 @@
---- x86_64/qttools/mkspecs/features/qt_find_clang.prf.orig	2018-06-14 23:07:07.157257900 +0300
-+++ x86_64/qttools/mkspecs/features/qt_find_clang.prf	2018-06-15 14:44:51.020540400 +0300
-@@ -65,16 +65,152 @@
+--- qt-everywhere-src-5.11.2/qttools/mkspecs/features/qt_find_clang.prf.orig	2018-09-03 18:13:05.000000000 +0300
++++ qt-everywhere-src-5.11.2/qttools/mkspecs/features/qt_find_clang.prf	2018-10-08 14:26:00.160671900 +0300
+@@ -70,16 +70,152 @@
      }
  
      # note: llvm_config only exits on unix
@@ -157,7 +157,7 @@
      }
      isEmpty(CLANG_VERSION) {
          !isEmpty(LLVM_INSTALL_DIR): \
-@@ -95,12 +231,12 @@
+@@ -102,7 +238,7 @@
  
      isEmpty(QDOC_USE_STATIC_LIBCLANG) {
          equals(QMAKE_HOST.os, Windows): \
@@ -166,15 +166,46 @@
          else: \
              CLANG_LIBS += -lclang
      } else {
--        equals(QMAKE_HOST.os, Windows) {
--            CLANG_LIBS += -llibclang_static -ladvapi32 -lshell32 -lMincore
-+        equals(QMAKE_HOST.os, Windows):!gcc {
-+            CLANG_LIBS += -lclang_static -lz3 -ladvapi32 -lshell32 -lversion
+@@ -111,6 +247,8 @@
+             CLANG_LIBS += -llibclang_static -ladvapi32 -lshell32 -lMincore
          } else {
              !equals(QMAKE_HOST.os, Darwin): CLANG_LIBS+=-Wl,--start-group
++            system("cd $${PWD}/../../src/qdoc && ar x $${CLANG_LIBDIR}/libclangEdit.a")
++            CLANGEDIT_OBJS = $$system("ar t $${CLANG_LIBDIR}/libclangEdit.a")
              CLANG_LIBS += -lclangAnalysis \
-@@ -159,140 +295,9 @@
+                         -lclangApplyReplacements \
+                         -lclangARCMigrate \
+@@ -123,9 +259,9 @@
+                         -lclangDaemon \
+                         -lclangDriver \
+                         -lclangDynamicASTMatchers \
+-                        -lclangEdit \
++                        $${CLANGEDIT_OBJS} \
+                         -lclangFormat \
+                         -lclangFrontend \
+                         -lclangFrontendTool \
+                         -lclangHandleCXX \
+                         -lclangIncludeFixer \
+@@ -145,6 +281,7 @@
+                         -lclangStaticAnalyzerCore \
+                         -lclangStaticAnalyzerFrontend \
+                         -lclangTidy \
++                        -lclangTidyAbseilModule \
+                         -lclangTidyAndroidModule \
+                         -lclangTidyBoostModule \
+                         -lclangTidyBugproneModule \
+@@ -160,149 +297,20 @@
+                         -lclangTidyObjCModule \
+                         -lclangTidyPerformanceModule \
+                         -lclangTidyPlugin \
++                        -lclangTidyPortabilityModule \
+                         -lclangTidyReadabilityModule \
+                         -lclangTidyUtils \
++                        -lclangTidyZirconModule \
+                         -lclangTooling \
+                         -lclangToolingASTDiff \
                          -lclangToolingCore \
++                        -lclangToolingInclusions \
                          -lclangToolingRefactor \
                          -lfindAllSymbols \
 -                        -lLLVMAArch64AsmParser \
@@ -312,7 +343,9 @@
 -                        -lLLVMXRay
 +                        $${LLVM_COMPONENTS}
              !equals(QMAKE_HOST.os, Darwin): CLANG_LIBS+=-Wl,--end-group
-+            CLANG_LIBS+= -lz3 -lgomp $${LLVM_SYSTEM_LIBS} -lversion
+             CLANG_LIBS += -lz
+-            equals(QMAKE_HOST.os, Windows): CLANG_LIBS += -lpsapi -lshell32 -lole32 -luuid -ladvapi32 -lversion
++            equals(QMAKE_HOST.os, Windows): CLANG_LIBS += -lz3 -lgomp -lpsapi -lshell32 -lole32 -luuid -ladvapi32 -lversion
+             else: CLANG_LIBS += -ldl
+             equals(QMAKE_HOST.os, Darwin): CLANG_LIBS += -lcurses -lm -lxml2
          }
-     }
- 

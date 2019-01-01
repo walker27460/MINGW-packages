@@ -3,24 +3,48 @@
 _realname=atomicwrites
 pkgbase=mingw-w64-python-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-python2-${_realname}" "${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
-pkgver=1.1.5
+pkgver=1.2.1
 pkgrel=1
-pkgdesc='Atomic file writes on POSIX (mingw-w64)'
-url='https://github.com/untitaker/python-atomicwrites'
+pkgdesc="Atomic file writes on POSIX (mingw-w64)"
+url="https://github.com/untitaker/python-atomicwrites"
 license=('MIT')
 arch=('any')
 makedepends=("${MINGW_PACKAGE_PREFIX}-python2-setuptools"
              "${MINGW_PACKAGE_PREFIX}-python3-setuptools")
-source=("https://pypi.io/packages/source/${_realname:0:1}/${_realname}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('240831ea22da9ab882b551b31d4225591e5e447a68c5e188db5b89ca1d487585')
+checkdepends=("${MINGW_PACKAGE_PREFIX}-python2-pytest"
+              "${MINGW_PACKAGE_PREFIX}-python2-pathlib2"
+              "${MINGW_PACKAGE_PREFIX}-python3-setuptools"
+              "${MINGW_PACKAGE_PREFIX}-python3-pathlib2")
+source=("${_realname}-${pkgver}.tar.gz"::"https://github.com/untitaker/python-atomicwrites/archive/${pkgver}.tar.gz")
+sha256sums=('84988f6ad66518546296ad002ed0e440560af7bfdeccb0b0e14672e6d71b0dc3')
+
+# Helper macros to help make tasks easier #
+apply_patch_with_msg() {
+  for _patch in "$@"
+  do
+    msg2 "Applying $_patch"
+    patch -Nbp1 -i "${srcdir}/$_patch"
+  done
+}
+
+del_file_exists() {
+  for _fname in "$@"
+  do
+    if [ -f $_fname ]; then
+      rm -rf $_fname
+    fi
+  done
+}
+# =========================================== #
 
 prepare() {
   cd "${srcdir}"
-
   for builddir in python{2,3}-build-${CARCH}; do  
     rm -rf $builddir | true
-    cp -r "${_realname}-${pkgver}" "${builddir}"
+    cp -r "python-${_realname}-${pkgver}" "${builddir}"
   done
+  # Set version for setuptools_scm
+  export SETUPTOOLS_SCM_PRETEND_VERSION=$pkgver
 }
 
 build() {  
@@ -28,6 +52,19 @@ build() {
     cd "${srcdir}/python${pver}-build-${CARCH}"
     MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
       ${MINGW_PREFIX}/bin/python${pver} setup.py build
+  done
+}
+
+check() {
+  for pver in {2,3}; do
+    msg "Python ${pver} test for ${CARCH}"
+    cd "${srcdir}/python${pver}-build-${CARCH}"
+    if [ "${pver}" -eq "2" ]
+    then
+      PYTHONPATH=build:${PYTHONPATH} ${MINGW_PREFIX}/bin/py.test2
+    else
+      PYTHONPATH=build:${PYTHONPATH} ${MINGW_PREFIX}/bin/py.test
+    fi
   done
 }
 

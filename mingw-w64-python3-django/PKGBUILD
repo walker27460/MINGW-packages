@@ -5,7 +5,7 @@
 _realname=django
 pkgbase=mingw-w64-python-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
-pkgver=2.0.7
+pkgver=2.1.4
 pkgrel=1
 pkgdesc="A high-level Python Web framework that encourages rapid development and clean design (mingw-w64)"
 arch=('any')
@@ -15,7 +15,7 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-python3"
              "${MINGW_PACKAGE_PREFIX}-python2-setuptools")
 options=('staticlibs' 'strip' '!debug')
 source=("Django-${pkgver}.tar.gz"::"https://www.djangoproject.com/download/${pkgver}/tarball/")
-sha512sums=('ef42d9046ce3e7b5067c5b85114c0cb5854b0ebb1d3bae526484f11da8abbf04864c83f176e9c6e498c9140b134c9a517968c7bb0bc087c49bf105b2aae8644c')
+sha512sums=('a2dc6fb7514f8d79aff98aeb0bd0edb1ede36ed2368e553fded8b58765092d6a2efcf2e9429bb9c7d2c16d466e46a9ff18aaf5911a7dd868f42569c1e82831aa')
 
 # Helper macros to help make tasks easier #
 apply_patch_with_msg() {
